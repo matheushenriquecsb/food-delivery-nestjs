@@ -6,6 +6,7 @@ import Stripe from 'stripe';
 
 import { PlaceOrderDto } from './dto/order-request.dto';
 import { PlaceOrder } from './entities/order.entity';
+import { VerifyOrder } from './dto/verify-order.dto';
 
 @Injectable()
 export class OrderService {
@@ -19,7 +20,12 @@ export class OrderService {
 
     try {
       const newOrder = new this.orderModel({
-        orderData: { ...payload, userId: id },
+        orderData: {
+          ...payload,
+          userId: id,
+        },
+        payment: false,
+        status: 'Food Processing',
       });
 
       await newOrder.save();
@@ -65,5 +71,44 @@ export class OrderService {
         message: error.message,
       };
     }
+  }
+
+  async verifyOrder(payload: VerifyOrder) {
+    const { success, orderId } = payload;
+    try {
+      if (Boolean(success) === true) {
+        await this.orderModel.findByIdAndUpdate(orderId, {
+          payment: 'true',
+        });
+
+        return {
+          success: true,
+          message: 'Paid',
+        };
+      } else {
+        await this.orderModel.findByIdAndDelete(orderId);
+        return {
+          success: false,
+          message: 'Not Paid',
+        };
+      }
+    } catch (e) {
+      console.log(e);
+      return {
+        success: false,
+        message: 'Error: ' + e.message,
+      };
+    }
+  }
+
+  async usersOrders(payload, token) {
+    const { id } = await this.jwtService.verify(token);
+    console.log(id);
+
+    const res = await this.orderModel
+      .findOne({ orderData: { userId: id } })
+      .exec();
+    console.log(res);
+    //  return res;
   }
 }

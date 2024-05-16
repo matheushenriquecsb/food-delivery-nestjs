@@ -15,13 +15,15 @@ export class CartService {
 
   async addToCart(payload: CartItemsDto, token: string) {
     const { id } = await this.jwtService.verify(token);
-
-    const addCart = await this.userModel.findByIdAndUpdate(
-      { _id: id },
-      { cartData: payload.cartItems },
-    );
-
-    return addCart;
+    try {
+      const addCart = await this.userModel.findByIdAndUpdate(
+        { _id: id },
+        { cartData: payload.cartItems },
+      );
+      return addCart;
+    } catch (error) {
+      console.log(error.message);
+    }
   }
 
   public async findUser(userId: string) {

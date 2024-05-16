@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { FoodRequestDto } from './dto/food-request.dto';
 import { FoodService } from './food.service';
+import { Food } from './entities/food.entity';
 
 @Controller('food')
 export class FoodController {
@@ -35,17 +36,17 @@ export class FoodController {
     @UploadedFile()
     image: Express.Multer.File,
     @Body() foodDto: FoodRequestDto,
-  ) {
+  ): Promise<void> {
     return this.foodService.addFood(foodDto, image);
   }
 
   @Get()
-  getFoods() {
+  async getFoods(): Promise<Food[]> {
     return this.foodService.getFoods();
   }
 
   @Delete(':id')
-  async removeFood(@Param('id') id: string) {
+  async removeFood(@Param('id') id: string): Promise<void> {
     return this.foodService.removeFood(id);
   }
 }

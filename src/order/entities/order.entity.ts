@@ -73,9 +73,12 @@ export class PlaceOrder {
     address: Address;
     items: Item[];
     amount: number;
-    status: Status;
-    payment: Payment;
   };
+  @Prop({ default: true })
+  payment: boolean;
+
+  @Prop({ default: 'Food Processing' })
+  status: string;
 }
 
 export const PlaceOrderSchema = SchemaFactory.createForClass(PlaceOrder);
