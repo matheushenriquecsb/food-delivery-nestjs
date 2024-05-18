@@ -21,10 +21,7 @@ export class OrderController {
   }
 
   @Post('/my-orders')
-  async userOrders(
-    @Body() payload: VerifyOrder,
-    @Headers('token') token: string,
-  ) {
-    return this.orderService.usersOrders(payload, token);
+  async userOrders(@Headers('token') token: string) {
+    return this.orderService.usersOrders(token);
   }
 }

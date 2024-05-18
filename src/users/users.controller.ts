@@ -10,12 +10,12 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('login')
-  login(@Body() loginDto: LoginDto): Promise<{ access_token: string }> {
+  async login(@Body() loginDto: LoginDto): Promise<{ access_token: string }> {
     return this.usersService.login(loginDto);
   }
 
   @Post('register')
-  register(@Body() registerDto: RegisterDto): Promise<Partial<User>> {
+  async register(@Body() registerDto: RegisterDto): Promise<Partial<User>> {
     return this.usersService.register(registerDto);
   }
 }

@@ -101,14 +101,13 @@ export class OrderService {
     }
   }
 
-  async usersOrders(payload, token) {
+  async usersOrders(token: string) {
     const { id } = await this.jwtService.verify(token);
-    console.log(id);
 
-    const res = await this.orderModel
-      .findOne({ orderData: { userId: id } })
-      .exec();
-    console.log(res);
-    //  return res;
+    const orderData = await this.orderModel.find();
+    const orderWithUserId = orderData.find(
+      (order) => order.orderData.userId === id,
+    );
+    return orderWithUserId;
   }
 }

@@ -55,16 +55,6 @@ class Item {
   quantity: number;
 }
 
-class Payment {
-  @Prop({ default: false })
-  payment: boolean;
-}
-
-class Status {
-  @Prop({ default: 'Food Processing' })
-  status: string;
-}
-
 @Schema({ timestamps: true })
 export class PlaceOrder {
   @Prop({ type: Address, Item })
