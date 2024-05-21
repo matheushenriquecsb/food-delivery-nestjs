@@ -9,7 +9,10 @@ export class CartController {
 
   @Post('add')
   @UseGuards(AuthGuard)
-  addToCart(@Body() cartDto: CartItemsDto, @Headers('token') token: string) {
+  addToCart(
+    @Body() cartDto: CartItemsDto,
+    @Headers('token') token: string,
+  ): Promise<void> {
     return this.cartService.addToCart(cartDto, token);
   }
 }

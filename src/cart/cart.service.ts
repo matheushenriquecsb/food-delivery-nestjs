@@ -1,36 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
-import { User } from '../users/entities/user.entity';
+import { CardItems } from './entities/card.entity';
 import { CartItemsDto } from './dto/cart-request.dto';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class CartService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectRepository(CardItems)
+    private cardRepository: Repository<CardItems>,
     private jwtService: JwtService,
+    private readonly userService: UsersService,
   ) {}
 
-  async addToCart(payload: CartItemsDto, token: string) {
+  async addToCart(payload: CartItemsDto, token: string): Promise<void | any> {
     const { id } = await this.jwtService.verify(token);
+    const user = await this.userService.findUser(id);
     try {
-      const addCart = await this.userModel.findByIdAndUpdate(
-        { _id: id },
-        { cartData: payload.cartItems },
-      );
-      return addCart;
+      for (const key in payload) {
+        if (Object.hasOwnProperty.call(payload, key)) {
+          console.log(payload);
+          const cartItem = payload[key];
+          const foodId = Object.keys(cartItem)[0];
+          const quantity = cartItem[foodId];
+
+          await this.cardRepository.save({
+            user: user,
+            foodId: +foodId,
+            quantity: quantity,
+          });
+        }
+      }
     } catch (error) {
-      console.log(error.message);
+      return { error: error };
     }
-  }
-
-  public async findUser(userId: string) {
-    const user = await this.userModel.findOne({
-      _id: userId,
-    });
-
-    return user;
   }
 }

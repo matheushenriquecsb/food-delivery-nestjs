@@ -5,7 +5,6 @@ import {
   IsNumber,
   ValidateNested,
   IsArray,
-  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -50,7 +49,7 @@ class AddressDto {
 class ItemDto {
   @IsNotEmpty()
   @IsString()
-  _id: string;
+  id: string;
 
   @IsNotEmpty()
   @IsString()
@@ -90,12 +89,6 @@ class OrderDataDto {
   @IsNotEmpty()
   @IsNumber()
   amount: number;
-
-  @IsBoolean()
-  payment: boolean;
-
-  @IsString()
-  status: string;
 }
 
 export class PlaceOrderDto {

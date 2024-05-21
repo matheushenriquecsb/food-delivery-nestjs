@@ -1,15 +1,19 @@
 import { Module } from '@nestjs/common';
-import { CartService } from './cart.service';
-import { CartController } from './cart.controller';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from 'src/users/entities/user.entity';
-import { UsersService } from 'src/users/users.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { User } from '../users/entities/user.entity';
+import { UsersModule } from '../users/users.module';
+import { UsersService } from '../users/users.service';
+import { CartController } from './cart.controller';
+import { CartService } from './cart.service';
+import { CardItems } from './entities/card.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    TypeOrmModule.forFeature([User, CardItems]),
+    UsersModule,
   ],
   controllers: [CartController],
   providers: [CartService, UsersService],

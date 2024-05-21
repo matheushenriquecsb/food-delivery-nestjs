@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
-import { Model } from 'mongoose';
 import { FoodRequestDto } from './dto/food-request.dto';
 import { Food } from './entities/food.entity';
 
 @Injectable()
 export class FoodService {
-  constructor(@InjectModel(Food.name) private foodModel: Model<Food>) {}
+  constructor(
+    @InjectRepository(Food)
+    private foodsRepository: Repository<Food>,
+  ) {}
 
   async addFood(payload: FoodRequestDto, image: any): Promise<void> {
     const food = new Food();
@@ -18,14 +21,23 @@ export class FoodService {
     food.price = payload.price;
     food.image = image.filename;
 
-    await this.foodModel.create(food);
+    this.foodsRepository.create(food);
   }
 
   async getFoods(): Promise<Food[]> {
-    return this.foodModel.find();
+    try {
+      const foods = await this.foodsRepository.find();
+      return foods;
+    } catch (e) {
+      throw new Error(e);
+    }
   }
-
   async removeFood(id: string): Promise<void> {
-    await this.foodModel.findByIdAndDelete(id);
+    try {
+      const food = await this.foodsRepository.findOneBy({ id: +id });
+      await this.foodsRepository.delete(food);
+    } catch (e) {
+      throw new Error(e);
+    }
   }
 }

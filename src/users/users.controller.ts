@@ -3,7 +3,6 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { LoginDto } from './dto/login-user.dto';
 import { RegisterDto } from './dto/register-user.dto';
-import { User } from './entities/user.entity';
 
 @Controller('users')
 export class UsersController {
@@ -15,7 +14,9 @@ export class UsersController {
   }
 
   @Post('register')
-  async register(@Body() registerDto: RegisterDto): Promise<Partial<User>> {
+  async register(
+    @Body() registerDto: RegisterDto,
+  ): Promise<{ message: string }> {
     return this.usersService.register(registerDto);
   }
 }
