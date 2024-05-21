@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -8,6 +7,7 @@ import { FoodModule } from './food/food.module';
 import { UsersModule } from './users/users.module';
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
+import { getOrmConfigs } from './config/orm.config';
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { OrderModule } from './order/order.module';
       serveRoot: '/uploads',
     }),
     ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot(process.env.MONGO_URI),
+    getOrmConfigs(),
     FoodModule,
     UsersModule,
     CartModule,

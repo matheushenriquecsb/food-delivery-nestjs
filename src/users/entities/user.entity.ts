@@ -1,21 +1,31 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { PlaceOrder } from '../../order/entities/order.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 
-export type UserDocument = HydratedDocument<User>;
-
-@Schema()
+@Entity()
 export class User {
-  @Prop({ required: false })
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ nullable: true })
   name: string;
 
-  @Prop({ required: false })
+  @Column({ nullable: true })
   email: string;
 
-  @Prop({ required: false })
+  @Column({ nullable: true })
   password: string;
 
-  @Prop({ required: false })
-  cartData: string[];
-}
+  @OneToMany(() => PlaceOrder, (placeOrder) => placeOrder.userId)
+  @JoinColumn()
+  orders?: PlaceOrder[];
 
-export const UserSchema = SchemaFactory.createForClass(User);
+  @CreateDateColumn()
+  createdAt: Date;
+}

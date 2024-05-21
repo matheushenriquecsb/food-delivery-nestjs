@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { User, UserSchema } from './entities/user.entity';
+import { User } from './entities/user.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
@@ -15,7 +15,7 @@ import { UsersService } from './users.service';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '80000s' },
     }),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    TypeOrmModule.forFeature([User]),
   ],
   controllers: [UsersController],
   providers: [UsersService],

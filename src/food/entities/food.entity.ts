@@ -1,24 +1,22 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-export type FoodDocument = HydratedDocument<Food>;
-
-@Schema()
+@Entity()
 export class Food {
-  @Prop({ required: true })
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ nullable: false })
   name: string;
 
-  @Prop({ required: true })
+  @Column({ nullable: false })
   description: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
   price: number;
 
-  @Prop({ required: true })
+  @Column({ length: 100, nullable: false })
   image: string;
 
-  @Prop({ required: true })
+  @Column({ nullable: false })
   category: string;
 }
-
-export const FoodSchema = SchemaFactory.createForClass(Food);

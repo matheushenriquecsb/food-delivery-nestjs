@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { CartService } from '../cart.service';
+import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private readonly cartService: CartService,
+    private readonly userService: UsersService,
     private jwtService: JwtService,
   ) {}
 
@@ -26,7 +26,7 @@ export class AuthGuard implements CanActivate {
 
     const decodedToken = await this.jwtService.verify(token);
 
-    const user = await this.cartService.findUser(decodedToken.id);
+    const user = await this.userService.findUser(decodedToken.id);
 
     if (!user) {
       throw new UnauthorizedException('User not exists!');

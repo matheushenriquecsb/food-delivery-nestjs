@@ -1,38 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import Stripe from 'stripe';
 
-import { PlaceOrderDto } from './dto/order-request.dto';
 import { PlaceOrder } from './entities/order.entity';
 import { VerifyOrder } from './dto/verify-order.dto';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class OrderService {
   constructor(
-    @InjectModel(PlaceOrder.name) private orderModel: Model<PlaceOrder>,
+    @InjectRepository(PlaceOrder)
+    private ordersRepository: Repository<PlaceOrder>,
+    private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
 
-  async placeOrder(payload: PlaceOrderDto, token: string) {
+  async placeOrder(payload: any, token: string) {
     const { id } = await this.jwtService.verify(token);
 
-    try {
-      const newOrder = new this.orderModel({
-        orderData: {
-          ...payload,
-          userId: id,
-        },
-        payment: false,
-        status: 'Food Processing',
-      });
+    const user = await this.usersService.findUser(id);
 
-      await newOrder.save();
+    try {
+      const newOrder = new PlaceOrder();
+      newOrder.userId = user;
+      newOrder.items = payload.orderData.items;
+      newOrder.address = payload.orderData.address;
+      newOrder.payment = false;
+      newOrder.status = 'Food Processing';
+      newOrder.amount = payload.orderData.amount;
+      const res = await this.ordersRepository.save(newOrder);
 
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-      const orderItems = payload.orderData.items.map((item) => ({
+      const orderItems = payload.orderData.items.map((item: any) => ({
         price_data: {
           currency: 'brl',
           product_data: {
@@ -57,8 +59,8 @@ export class OrderService {
       const session = await stripe.checkout.sessions.create({
         line_items: orderItems,
         mode: 'payment',
-        success_url: `${process.env.FRONTEND_URL}/verify?success=true&orderId=${newOrder._id}`,
-        cancel_url: `${process.env.FRONTEND_URL}/verify?success=false&orderId=${newOrder._id}`,
+        success_url: `${process.env.FRONTEND_URL}/verify?success=true&orderId=${res.id}`,
+        cancel_url: `${process.env.FRONTEND_URL}/verify?success=false&orderId=${res.id}`,
       });
 
       return {
@@ -73,12 +75,13 @@ export class OrderService {
     }
   }
 
-  async verifyOrder(payload: VerifyOrder) {
-    const { success, orderId } = payload;
+  async verifyOrder(
+    payload: VerifyOrder,
+  ): Promise<{ success: boolean; message: string }> {
     try {
-      if (Boolean(success) === true) {
-        await this.orderModel.findByIdAndUpdate(orderId, {
-          payment: 'true',
+      if (Boolean(payload.success) === true) {
+        await this.ordersRepository.update(payload.orderId, {
+          payment: true,
         });
 
         return {
@@ -86,14 +89,16 @@ export class OrderService {
           message: 'Paid',
         };
       } else {
-        await this.orderModel.findByIdAndDelete(orderId);
+        const order = await this.ordersRepository.findOneBy({
+          id: payload.orderId,
+        });
+        await this.ordersRepository.delete(order);
         return {
           success: false,
           message: 'Not Paid',
         };
       }
     } catch (e) {
-      console.log(e);
       return {
         success: false,
         message: 'Error: ' + e.message,
@@ -104,10 +109,9 @@ export class OrderService {
   async usersOrders(token: string) {
     const { id } = await this.jwtService.verify(token);
 
-    const orderData = await this.orderModel.find();
-    const orderWithUserId = orderData.find(
-      (order) => order.orderData.userId === id,
-    );
-    return orderWithUserId;
+    const placeOrderUser = await this.ordersRepository.find({
+      where: { userId: id },
+    });
+    console.log(placeOrderUser);
   }
 }

@@ -7,13 +7,19 @@ import {
 } from 'class-validator';
 
 export class LoginDto {
-  @ApiProperty()
+  @ApiProperty({
+    example: 'matheus.teste@gmail.com',
+    required: true,
+  })
   @IsNotEmpty()
   @IsString()
   @IsEmail()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    example: 'Teste@567',
+    required: true,
+  })
   @IsNotEmpty()
   @IsStrongPassword()
   @IsString()
