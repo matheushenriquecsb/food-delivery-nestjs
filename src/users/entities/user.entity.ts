@@ -23,7 +23,6 @@ export class User {
   password: string;
 
   @OneToMany(() => PlaceOrder, (placeOrder) => placeOrder.userId)
-  @JoinColumn()
   orders?: PlaceOrder[];
 
   @CreateDateColumn()

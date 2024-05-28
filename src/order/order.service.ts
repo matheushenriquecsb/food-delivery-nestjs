@@ -30,8 +30,7 @@ export class OrderService {
       newOrder.payment = false;
       newOrder.status = 'Food Processing';
       newOrder.amount = payload.orderData.amount;
-      const res = await this.ordersRepository.save(newOrder);
-
+      const res = this.ordersRepository.create(newOrder);
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
       const orderItems = payload.orderData.items.map((item: any) => ({
