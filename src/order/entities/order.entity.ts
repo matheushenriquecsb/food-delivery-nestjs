@@ -15,7 +15,7 @@ export class PlaceOrder {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.orders)
+  @ManyToOne(() => User, (user) => user.id)
   userId: User;
 
   @ManyToOne(() => Address, { cascade: true, eager: true })
